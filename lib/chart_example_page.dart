@@ -56,7 +56,7 @@ class _ChartExamplePageState extends State<ChartExamplePage> {
                 )
               ];
 
-              for (int i = 0; i < 15; i++) {
+              for (int i = 0; i < 10; i++) {
                 builder.add(_buildRandomChart());
               }
               return builder;
@@ -145,6 +145,8 @@ class _ChartExamplePageState extends State<ChartExamplePage> {
         topMarginSpec: charts.MarginSpec.fixedPixel(0),
         bottomMarginSpec: charts.MarginSpec.fixedPixel(0),
       ),
+      defaultRenderer: charts.LineRendererConfig(
+          roundEndCaps: true, includeArea: true, areaOpacity: 0.5),
     );
   }
 }
