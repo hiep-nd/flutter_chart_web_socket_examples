@@ -25,7 +25,8 @@ class _ChartExamplePageState extends State<ChartExamplePage> {
           child: _buildLineChart(
             data: (() {
               final builder = <_Point>[];
-              for (int i = 0; i < 10; i++) {
+              final start = random.nextInt(5);
+              for (int i = start; i < start + 10; i++) {
                 builder.add(_Point(
                     domain: i.toDouble(), measure: random.nextInt(1000) / 10));
               }
@@ -93,14 +94,14 @@ class _ChartExamplePageState extends State<ChartExamplePage> {
     required charts.TypedAccessorFn<D, double> measureFn,
   }) {
     final measures = data.map((e) => measureFn(e, null));
-    final minM = measures.fold<double>(0, min);
-    final maxM = measures.fold<double>(0, max);
+    final minM = measures.fold<double>(double.infinity, min);
+    final maxM = measures.fold<double>(double.negativeInfinity, max);
 
     final deltaM = min(base, minM);
 
     final domains = data.map((e) => domainFn(e, null));
-    final minD = domains.fold<double>(0, min);
-    final maxD = domains.fold<double>(0, max);
+    final minD = domains.fold<double>(double.infinity, min);
+    final maxD = domains.fold<double>(double.negativeInfinity, max);
 
     final lastM = measureFn(data.last, data.length - 1);
     final color = lastM > base
@@ -114,12 +115,14 @@ class _ChartExamplePageState extends State<ChartExamplePage> {
         charts.Series<_Point, double>(
           id: 'Base',
           data: [
-            _Point(domain: minD, measure: base),
-            _Point(domain: maxD, measure: base),
+            _Point(domain: 0, measure: base),
+            _Point(domain: 15, measure: base),
           ],
           domainFn: _Point.getDomain,
-          measureFn: (datum, index) => _Point.getMeasure(datum, index) - deltaM,
+          measureFn: (datum, index) =>
+              0, // _Point.getMeasure(datum, index) - deltaM,
           colorFn: (_, __) => const charts.Color(r: 0xC7, g: 0xC7, b: 0xCC),
+          areaColorFn: (_, __) => charts.Color.transparent,
           dashPatternFn: (_, __) => [4, 4],
           strokeWidthPxFn: (datum, index) => 1,
         ),
@@ -127,11 +130,16 @@ class _ChartExamplePageState extends State<ChartExamplePage> {
           id: 'Price',
           data: data,
           domainFn: domainFn,
-          measureFn: (datum, index) => measureFn(datum, index) - deltaM,
-          measureLowerBoundFn: (_, __) => 0,
-          measureUpperBoundFn: (_, __) => maxM - deltaM,
+          measureFn: (datum, index) => measureFn(datum, index) - deltaM - base,
+          // measureLowerBoundFn: (_, __) => 100, // minM - deltaM,
+          // measureUpperBoundFn: (datum, index) =>
+          //     measureFn(datum, index) - deltaM, //(_, __) => maxM - deltaM,
           colorFn: (_, __) => color,
+          // areaColorFn: (value, index) =>
+          //     charts.Color(r: 0x2E, g: 0x00, b: 0x85, a: 25),
           strokeWidthPxFn: (datum, index) => 1,
+          // fillColorFn: (value, index) =>
+          // charts.Color(r: 0xFE, g: 0xBD, b: 0x85),
         ),
       ],
       animate: true,
@@ -146,7 +154,11 @@ class _ChartExamplePageState extends State<ChartExamplePage> {
         bottomMarginSpec: charts.MarginSpec.fixedPixel(0),
       ),
       defaultRenderer: charts.LineRendererConfig(
-          roundEndCaps: true, includeArea: true, areaOpacity: 0.5),
+        // roundEndCaps: true,
+        includeArea: true,
+        // areaOpacity: 0.2,
+        // stacked: true,
+      ),
     );
   }
 }
